@@ -4,7 +4,7 @@ export enum FavoriteQueryOrderBy {
   }
   
   export enum FavoriteQueryOrderDirection {
-    ASC = "asc",
-    DESC = "desc"
+    ASC = "ASC",
+    DESC = "DESC"
   }
   
