@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ClassSerializerInterceptor, SerializeOptions, UseInterceptors, BadRequestException, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ClassSerializerInterceptor, SerializeOptions, UseInterceptors, BadRequestException, UseGuards, Query, UseFilters } from '@nestjs/common';
 import { CarrierService } from './carrier.service';
 import { CreateCarrierDto } from './dto/create-carrier.dto';
 import { UpdateCarrierDto } from './dto/update-carrier.dto';
@@ -17,6 +17,7 @@ import { VehicleOneResponseDto } from '../vehicles/dto/vehicle-one-response.dto'
 import { UserOneResponseDto } from '../users/dto/user-one-response.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { AllExceptionsFilter } from '../../utils/postgre-exception.filters';
 
 @ApiTags("carrier")
 @ApiBearerAuth()
@@ -27,6 +28,7 @@ import { User } from '../users/entities/user.entity';
 })
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('carrier')
+@UseFilters(AllExceptionsFilter)
 export class CarrierController {
   constructor(private readonly carrierService: CarrierService) {}
 
