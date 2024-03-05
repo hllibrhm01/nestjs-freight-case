@@ -12,13 +12,12 @@ import { Carrier } from "src/modules/carrier/entities/carrier.entity";
   @Entity()
   export class City extends CommonEntity {
     // a table can be made in the future
-    // will fix this later
     @Column({ 
       type: "varchar", 
       default: Country.Turkey,
       nullable: false
     })
-    countryId: number;
+    country: string;
   
     @Column({ 
       type: "varchar", 
