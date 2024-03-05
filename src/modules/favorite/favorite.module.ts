@@ -9,8 +9,7 @@ import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Favorite]), 
-    ConfigModule,
-    UsersModule
+    ConfigModule
   ],
   controllers: [FavoriteController],
   providers: [FavoriteService],
