@@ -39,7 +39,6 @@ export class CarrierController {
     try {
       await this.carrierService.create(createCarrierDto);
 
-      // will be replaced with a response dto
       return {
         message: 'Carrier created successfully',
       };
