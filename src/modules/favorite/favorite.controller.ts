@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, SerializeOptions, ClassSerializerInterceptor, UseInterceptors, UseGuards, BadRequestException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, SerializeOptions, ClassSerializerInterceptor, UseInterceptors, UseGuards, BadRequestException, Query, UseFilters } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { UpdateFavoriteDto } from './dto/update-favorite.dto';
@@ -19,6 +19,7 @@ import { CityOneResponseDto } from '../cities/dto/city-one-response.dto';
 import { DistrictOneResponseDto } from '../districts/dto/district-one-response.dto';
 import { VehicleOneResponseDto } from '../vehicles/dto/vehicle-one-response.dto';
 import { FavoriteResponseDto } from './dto/favorite.response.dto';
+import { InternalServerErrorFilter } from '../../utils/internal-server.filter';
 
 @ApiTags("favorites")
 @ApiBearerAuth()
@@ -110,6 +111,7 @@ export class FavoriteController {
   })
   @Get(':id')
   @ApiNotFoundResponse({ description: "Favorite not found" })
+  @UseFilters(InternalServerErrorFilter)
   // @UseGuards(RolesGuard)
   // @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   async findOne(
@@ -120,21 +122,14 @@ export class FavoriteController {
   
     if (!favorite) throw new BadRequestException("Favorite not found");
 
+    console.log(favorite.carrier.city);
     const response = new FavoriteOneResponseDto();
     response.result = new FavoriteResponseDto();
     response.result.user = new UserOneResponseDto();
     response.result.user.result = favorite.user;
     response.result.carrier = new CarrierOneResponseDto();
-    console.log(favorite.carrier);
     response.result.carrier.result.city = new CityOneResponseDto();
-  
     response.result.carrier.result.city.result = favorite.carrier.city;
-    response.result.carrier.result.district = new DistrictOneResponseDto();
-    response.result.carrier.result.district.result = favorite.carrier.district;
-    response.result.carrier.result.user = new UserOneResponseDto();
-    response.result.carrier.result.user.result = favorite.carrier.user;
-    response.result.carrier.result.vehicle = new VehicleOneResponseDto();
-    response.result.carrier.result.vehicle.result = favorite.carrier.vehicle;
 
     return response;
   }
@@ -150,11 +145,11 @@ export class FavoriteController {
   @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   async update(@Param('id') id: string, @Body() updateFavoriteDto: UpdateFavoriteDto) {
     try {
-      const favorite = await this.favoriteService.update(+id, updateFavoriteDto);
+      await this.favoriteService.update(+id, updateFavoriteDto);
 
-      const response = new FavoriteOneResponseDto();
-      response.result = favorite;
-      return response;
+      return {
+        message: "Favorite updated successfully"
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
