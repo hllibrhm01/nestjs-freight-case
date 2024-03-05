@@ -91,7 +91,6 @@ export class CarrierController {
         queryOrderDirection,
         false
       );
-      console.log(results);
 
       const result = new PagedCarrierResponseDto();
       result.count = count;
