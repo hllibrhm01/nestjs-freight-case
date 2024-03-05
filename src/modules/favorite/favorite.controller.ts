@@ -20,6 +20,7 @@ import { DistrictOneResponseDto } from '../districts/dto/district-one-response.d
 import { VehicleOneResponseDto } from '../vehicles/dto/vehicle-one-response.dto';
 import { FavoriteResponseDto } from './dto/favorite.response.dto';
 import { InternalServerErrorFilter } from '../../utils/internal-server.filter';
+import { AllExceptionsFilter } from '../../utils/postgre-exception.filters';
 
 @ApiTags("favorites")
 @ApiBearerAuth()
@@ -30,6 +31,7 @@ import { InternalServerErrorFilter } from '../../utils/internal-server.filter';
 })
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('favorite')
+@UseFilters(AllExceptionsFilter)
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}
 
@@ -122,14 +124,22 @@ export class FavoriteController {
   
     if (!favorite) throw new BadRequestException("Favorite not found");
 
-    console.log(favorite.carrier.city);
     const response = new FavoriteOneResponseDto();
     response.result = new FavoriteResponseDto();
     response.result.user = new UserOneResponseDto();
     response.result.user.result = favorite.user;
     response.result.carrier = new CarrierOneResponseDto();
+    // @ts-expect-error
+    response.result.carrier.result = favorite.carrier;
+    response.result.carrier.result.user = new UserOneResponseDto();
+    response.result.carrier.result.user.result = favorite.carrier.user;
+    response.result.carrier.result.vehicle = new VehicleOneResponseDto();
+    response.result.carrier.result.vehicle.result = favorite.carrier.vehicle;
     response.result.carrier.result.city = new CityOneResponseDto();
     response.result.carrier.result.city.result = favorite.carrier.city;
+    response.result.carrier.result.district = new DistrictOneResponseDto();
+    // @ts-expect-error
+    response.result.carrier.result.district.result = favorite.carrier.district;
 
     return response;
   }
