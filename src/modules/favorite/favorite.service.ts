@@ -4,17 +4,17 @@ import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 import { CommonService } from '../common/common.service';
 import { Favorite } from './entities/favorite.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { UsersService } from '../users/users.service';
 import { RoleEnum } from '../roles/roles.enum';
 import { User } from '../users/entities/user.entity';
+import { FavoriteQueryOrderBy, FavoriteQueryOrderDirection } from './favorite.enums';
 
 @Injectable()
 export class FavoriteService extends CommonService<Favorite> {
   constructor(
     @InjectRepository(Favorite)
-    private favoriteRepository: Repository<Favorite>,
-    private usersService: UsersService
+    private favoriteRepository: Repository<Favorite>
   ) {
     super(favoriteRepository);
   }
@@ -41,6 +41,56 @@ export class FavoriteService extends CommonService<Favorite> {
     if (updateFavoriteDto.carrierId) favorite.carrierId = updateFavoriteDto.carrierId;
 
     return await this.favoriteRepository.save(favorite);
+  }
+
+  async getFavoritesWithJoin(
+    userId: number | undefined,
+    carrierId: number | undefined,
+    limit: number | undefined,
+    skip: number | undefined,
+    orderBy: FavoriteQueryOrderBy | undefined,
+    orderDirection: FavoriteQueryOrderDirection,
+    count: true
+  ): Promise<number>;
+  async getFavoritesWithJoin(
+    userId: number | undefined,
+    carrierId: number | undefined,
+    limit: number | undefined,
+    skip: number | undefined,
+    orderBy: FavoriteQueryOrderBy | undefined,
+    orderDirection: FavoriteQueryOrderDirection,
+    count: false
+  ): Promise<Favorite[]>;
+  async getFavoritesWithJoin(
+    userId: number | undefined,
+    carrierId: number | undefined,
+    limit: number | undefined,
+    skip: number | undefined,
+    orderBy: FavoriteQueryOrderBy | undefined,
+    orderDirection: FavoriteQueryOrderDirection,
+    count: boolean
+  ): Promise<Favorite[] | number> {
+    const queryBuilder: SelectQueryBuilder<Favorite> =
+      this.favoriteRepository.createQueryBuilder('favorite');
+
+    const query = queryBuilder
+      .innerJoinAndSelect('favorite.user', 'user')
+      .innerJoinAndSelect('favorite.carrier', 'carrier')
+      .innerJoinAndSelect('carrier.city', 'city')
+      .innerJoinAndSelect('carrier.district', 'district')
+      .innerJoinAndSelect('carrier.user', 'carrierUser')
+      .innerJoinAndSelect('carrier.vehicle', 'vehicle');  
+
+    if (userId !== undefined) query.where('favorite.userId = :id', { id: userId });
+    if (carrierId !== undefined) query.where('favorite.carrierId = :id', { id: carrierId });
+
+    if (count) return await query.getCount();
+
+    return query
+      .orderBy(`favorite.${orderBy}`, orderDirection)
+      .skip(skip)
+      .take(limit)
+      .getMany();
   }
 
   async findOneWithJoin(id: number): Promise<Favorite> {
