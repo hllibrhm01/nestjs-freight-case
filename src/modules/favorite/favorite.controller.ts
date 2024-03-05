@@ -9,7 +9,7 @@ import { RoleEnum } from '../roles/roles.enum';
 import { FavoriteOneResponseDto } from './dto/favorite-one-response.dto';
 import { QueryFavoriteDto } from './dto/query-favorite.dto';
 import { SortByObject } from '../../utils/sortBy';
-import { FavoriteQueryOrderDirection } from './favorite.enums';
+import { FavoriteQueryOrderBy, FavoriteQueryOrderDirection } from './favorite.enums';
 import { PagedFavoriteResponseDto } from './dto/paged-favorite-response.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -74,34 +74,58 @@ export class FavoriteController {
     const page: number = query.page ?? 1;
     const skip = (page - 1) * limit;
 
-    const orderBy = query.orderBy ?? -1;
-    const sort: SortByObject = {};
-    sort[orderBy] =
-      query.orderDirection === FavoriteQueryOrderDirection.DESC ? -1 : 1;
+    const queryOrderBy =
+    query.orderBy === undefined
+      ? FavoriteQueryOrderBy.CREATED
+      : query.orderBy;
+    const queryOrderDirection =
+    query.orderDirection === undefined
+      ? FavoriteQueryOrderDirection.DESC
+      : query.orderDirection;
 
-    const queryObject = {
-      ...(query.carrierId && { carrierId: query.carrierId }),
-      ...(query.userId && { userId: query.userId })
-    };
-
-    const count = await this.favoriteService.findAll(
-      queryObject,
-      undefined,
-      undefined,
-      null
-    );
-
-    const results = await this.favoriteService.findAll(
-      queryObject,
+    const count = await this.favoriteService.getFavoritesWithJoin(
+      query.userId,
+      query.carrierId,
       limit,
       skip,
-      sort
+      queryOrderBy,
+      queryOrderDirection,
+      true
     );
 
+    const results = await this.favoriteService.getFavoritesWithJoin(
+      query.userId,
+      query.carrierId,
+      limit,
+      skip,
+      queryOrderBy,
+      queryOrderDirection,
+      false
+    );
+    
     const result = new PagedFavoriteResponseDto();
-    result.count = count[1];
+    result.count = count;
     result.page = page;
     result.limit = limit;
+    result.result = results.map((favorite) => {
+      const response = new FavoriteResponseDto();
+      response.user = new UserOneResponseDto();
+      response.user.result = favorite.user;
+      response.carrier = new CarrierOneResponseDto();
+      // @ts-expect-error
+      response.carrier.result = favorite.carrier;
+      response.carrier.result.user = new UserOneResponseDto();
+      response.carrier.result.user.result = favorite.carrier.user;
+      response.carrier.result.vehicle = new VehicleOneResponseDto();
+      response.carrier.result.vehicle.result = favorite.carrier.vehicle;
+      response.carrier.result.city = new CityOneResponseDto();
+      response.carrier.result.city.result = favorite.carrier.city;
+      response.carrier.result.district = new DistrictOneResponseDto();
+      // @ts-expect-error
+      response.carrier.result.district.result = favorite.carrier.district;
+
+      return response;
+    });
 
     return result;
   }
