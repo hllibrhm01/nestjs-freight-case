@@ -53,20 +53,4 @@ export class FavoriteService extends CommonService<Favorite> {
 
     return favorite;
   }
-
-  // current user
-  async findOneBelongToUser(userId: number, carrierId: number) {
-      const user = await this.usersService.findOne(userId);
-
-      if (user?.role !== RoleEnum.ADMIN) {
-        const checkBelongToUser = await this.favoriteRepository.findOne({
-          where: { userId }
-        });
-
-
-      }
-
-
-  }
-
 }
