@@ -24,7 +24,4 @@ export class Favorite extends CommonEntity {
     @ManyToOne('Carrier', 'favorites')
     @JoinColumn()
     carrier: Carrier;
-    
-    // will add carrier relation
-    // will add user relation
 }
