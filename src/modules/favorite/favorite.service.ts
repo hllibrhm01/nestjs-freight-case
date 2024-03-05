@@ -46,7 +46,7 @@ export class FavoriteService extends CommonService<Favorite> {
   async findOneWithJoin(id: number): Promise<Favorite> {
     const favorite = await this.favoriteRepository.findOne({
       where: { id },
-      relations: ['user', 'carrier']
+      relations: ['user', 'carrier', 'carrier.city', 'carrier.district', 'carrier.user', 'carrier.vehicle']
     });
 
     if (!favorite) throw new Error('Favorite not found');
