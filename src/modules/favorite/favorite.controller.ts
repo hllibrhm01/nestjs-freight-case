@@ -68,7 +68,16 @@ export class FavoriteController {
   @Get()
   @UseGuards(RolesGuard)
   @Roles(RoleEnum.USER, RoleEnum.ADMIN)
-  async findAll(@Query() query: QueryFavoriteDto) {
+  async findAll(
+    @Query() query: QueryFavoriteDto,
+    @CurrentUser() user: User
+  ) {
+    let userId: number = 0;
+
+    if (user.role !== RoleEnum.ADMIN) {
+      userId = user.id;
+    }
+  
     const limit: number = query.limit ?? 10;
     const page: number = query.page ?? 1;
     const skip = (page - 1) * limit;
@@ -83,7 +92,7 @@ export class FavoriteController {
       : query.orderDirection;
 
     const count = await this.favoriteService.getFavoritesWithJoin(
-      query.userId,
+      userId,
       query.carrierId,
       limit,
       skip,
@@ -93,7 +102,7 @@ export class FavoriteController {
     );
 
     const results = await this.favoriteService.getFavoritesWithJoin(
-      query.userId,
+      userId,
       query.carrierId,
       limit,
       skip,
@@ -137,13 +146,13 @@ export class FavoriteController {
   @Get(':id')
   @ApiNotFoundResponse({ description: "Favorite not found" })
   @UseFilters(InternalServerErrorFilter)
-  // @UseGuards(RolesGuard)
-  // @Roles(RoleEnum.USER, RoleEnum.ADMIN)
+  @UseGuards(RolesGuard)
+  @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   async findOne(
     @Param('id') id: string,
     @CurrentUser() user: User
   ) {
-    const favorite = await this.favoriteService.findOneWithJoin(+id);
+    const favorite = await this.favoriteService.findOneWithJoin(+id, user);
   
     if (!favorite) throw new BadRequestException("Favorite not found");
 
