@@ -27,6 +27,7 @@ import {
 import { CurrentUser } from "./current-user.decorator";
 import { User } from "../users/entities/user.entity";
 import { ConfigService } from "@nestjs/config";
+import { AllExceptionsFilter } from "src/utils/postgre-exception.filters";
 
 @ApiTags("auth")
 @UseInterceptors(ClassSerializerInterceptor)
@@ -36,6 +37,7 @@ import { ConfigService } from "@nestjs/config";
   excludePrefixes: ["_", "$"],
   enableCircularCheck: true
 })
+@UseFilters(AllExceptionsFilter)
 @Controller("auth")
 export class AuthController {
   private readonly jwtAccessExpirationMinutes: number;

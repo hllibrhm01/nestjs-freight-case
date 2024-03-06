@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, SerializeOptions, UseInterceptors, ClassSerializerInterceptor, BadRequestException, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, SerializeOptions, UseInterceptors, ClassSerializerInterceptor, BadRequestException, UseGuards, Query, UseFilters } from '@nestjs/common';
 import { DistrictsService } from './districts.service';
 import { CreateDistrictDto } from './dto/create-district.dto';
 import { UpdateDistrictDto } from './dto/update-district.dto';
@@ -13,6 +13,7 @@ import { PagedDistrictResponseDto } from './dto/paged-district-response.dto';
 import { PagedCityResponseDto } from '../cities/dto/paged-city-response.dto';
 import { DistrictResponseDto } from './dto/district.response.dto';
 import { CityOneResponseDto } from '../cities/dto/city-one-response.dto';
+import { AllExceptionsFilter } from 'src/utils/postgre-exception.filters';
 
 @ApiTags("districts")
 @ApiBearerAuth()
@@ -22,6 +23,7 @@ import { CityOneResponseDto } from '../cities/dto/city-one-response.dto';
   enableCircularCheck: true
 })
 @UseInterceptors(ClassSerializerInterceptor)
+@UseFilters(AllExceptionsFilter)
 @Controller('districts')
 export class DistrictsController {
   constructor(private readonly districtsService: DistrictsService) {}

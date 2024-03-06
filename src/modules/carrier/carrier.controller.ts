@@ -48,8 +48,6 @@ export class CarrierController {
   }
 
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles(RoleEnum.ADMIN)
   async findAll(
     @Query() query: QueryCarrierDto
   ): Promise<PagedCarrierResponseDto> {

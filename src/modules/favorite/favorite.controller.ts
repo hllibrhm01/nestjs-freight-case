@@ -36,15 +36,14 @@ export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}
 
   @Post()
-  // @UseGuards(RolesGuard)
-  // @Roles(RoleEnum.USER)
+  @UseGuards(RolesGuard)
+  @Roles(RoleEnum.USER, RoleEnum.ADMIN)
   async create(
     @Body() createFavoriteDto: CreateFavoriteDto,
     @CurrentUser() user: User
   ) {
     try {
       const favorite = await this.favoriteService.create(createFavoriteDto, user);
-      console.log(favorite);
 
       const response = new FavoriteOneResponseDto();  
       response.result.user = new UserOneResponseDto();

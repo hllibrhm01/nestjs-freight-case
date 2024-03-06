@@ -22,8 +22,11 @@ export class FavoriteService extends CommonService<Favorite> {
   async create(createFavoriteDto: CreateFavoriteDto, user: User) {
     const favorite = this.favoriteRepository.create(createFavoriteDto);
 
+    if (user.role !== RoleEnum.USER) 
+      throw new Error('Only users can create favorites');
+
     const existingFavorite = await this.favoriteRepository.findOne({
-      where: { userId: createFavoriteDto.userId, carrierId: createFavoriteDto.carrierId }
+      where: { userId: user.id, carrierId: createFavoriteDto.carrierId }
     });
 
     if (existingFavorite !== null) 
