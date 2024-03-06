@@ -1,10 +1,13 @@
-import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
+import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { UsersService } from "./modules/users/users.service";
 import { RoleEnum } from "./modules/roles/roles.enum";
 
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
-  constructor(private userService: UsersService) {}
+  private logger: Logger = new Logger(AppService.name);
+  constructor(
+    private userService: UsersService,
+  ) {}
 
   onApplicationBootstrap(): any {
     this.adminUserSeed();
@@ -30,7 +33,7 @@ export class AppService implements OnApplicationBootstrap {
       };
       await this.userService.create(user);
 
-      console.log("Admin user created");
+      this.logger.log("Admin user created");
     }
   }
 }
