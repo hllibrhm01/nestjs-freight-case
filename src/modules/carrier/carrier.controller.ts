@@ -130,8 +130,6 @@ export class CarrierController {
   })
   @Get(':id')
   @ApiNotFoundResponse({ description: "Carrier not found" })
-  @UseGuards(RolesGuard)
-  @Roles(RoleEnum.ADMIN)
   async findOne(@Param('id') id: number) {
     const carrier = await this.carrierService.findOneWithJoin(id);
 
