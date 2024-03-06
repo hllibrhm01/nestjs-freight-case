@@ -40,7 +40,6 @@ export class FavoriteService extends CommonService<Favorite> {
 
     if (!favorite) throw new Error('Favorite not found');
 
-    if (updateFavoriteDto.userId) favorite.userId = updateFavoriteDto.userId;
     if (updateFavoriteDto.carrierId) favorite.carrierId = updateFavoriteDto.carrierId;
 
     return await this.favoriteRepository.save(favorite);
@@ -96,9 +95,12 @@ export class FavoriteService extends CommonService<Favorite> {
       .getMany();
   }
 
-  async findOneWithJoin(id: number): Promise<Favorite> {
+  async findOneWithJoin(
+    id: number,
+    user: User
+    ): Promise<Favorite> {
     const favorite = await this.favoriteRepository.findOne({
-      where: { id },
+      where: { id: id, userId: user.id },
       relations: ['user', 'carrier', 'carrier.city', 'carrier.district', 'carrier.user', 'carrier.vehicle']
     });
 
